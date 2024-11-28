@@ -7,31 +7,24 @@ struct pos{
     int x, y;
 };
 
-std::vector<std::vector<char>> save_data(std::ifstream& input)
+std::vector<std::vector<char>> load_data(std::ifstream& input)
 {
     std::vector<std::vector<char>> data;
-
-    int line_counter = 0;
 
     std::string line;
     while(getline(input, line))
     {
-        data.push_back(std::vector<char>());
-        for(char i : line)
-        {
-            data[line_counter].push_back(i);
-        }
-        line_counter++;
+        data.push_back(std::vector<char>(line.begin(), line.end()));
     }
 
     return data;
 }
 
-void print_data(std::vector<std::vector<char>>& data)
+void print_data(const std::vector<std::vector<char>>& data)
 {
-    for(int i = 0; i < data.size(); i++)
+    for(std::size_t i = 0; i < data.size(); ++i)
     {
-        for(int j = 0; j < data[i].size(); j++)
+        for(std::size_t j = 0; j < data[i].size(); ++j)
         {
             std::cout<<data[i][j]<<' ';
         }
@@ -39,13 +32,13 @@ void print_data(std::vector<std::vector<char>>& data)
     }
 }
 
-std::vector<pos> save_symbol_positions(std::vector<std::vector<char>>& data, int i, int j)
+std::vector<pos> save_symbol_positions(const std::vector<std::vector<char>>& data, int i, int j)
 {
     std::vector<pos> symbol_positions;
 
-    if(i != (data.size() - 1))
+    if(i+1 < data.size())
     {
-        if(j != (data[i].size() - 1))
+        if(j+1 < data[i].size())
             symbol_positions.push_back(pos{j+1, i+1});
         symbol_positions.push_back(pos{j, i+1});
         if(j != 0)
@@ -58,10 +51,10 @@ std::vector<pos> save_symbol_positions(std::vector<std::vector<char>>& data, int
         if(j != 0)
             symbol_positions.push_back(pos{j-1, i-1});
         symbol_positions.push_back(pos{j, i-1});
-        if(j != (data[i].size() - 1))
+        if(j+1 < data[i].size())
             symbol_positions.push_back(pos{j+1, i-1});
     }
-    if(j != (data[i].size() - 1) && !isdigit(data[i][j+1]))
+    if(j+1 < data[i].size() && !isdigit(data[i][j+1]))
         symbol_positions.push_back(pos{j+1, i});
 
     return symbol_positions;
@@ -81,23 +74,22 @@ int main(int argc, char* argv[])
 {
     std::ifstream input(argv[1]);
 
-    int sum;
+    int sum = 0;
 
-    std::vector<std::vector<char>> data = save_data(input);
+    std::vector<std::vector<char>> data = load_data(input);
 
     std::string potential_part;
     std::vector<pos> symbol_positions;
 
-    for(int i = 0; i < data.size(); i++) 
+    for(std::size_t i = 0; i < data.size(); ++i) 
     {
-        for(int j = 0; j < data[i].size(); j++) 
+        for(std::size_t j = 0; j < data[i].size(); ++j) 
         {
             if(isdigit(data[i][j]))
             {
                 potential_part.push_back(data[i][j]);
 
-                std::vector<pos> temp = save_symbol_positions(data, i, j);
-                for(pos i : temp)
+                for(pos i : save_symbol_positions(data, i, j))
                     symbol_positions.push_back(i);
             }
             else
